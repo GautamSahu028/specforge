@@ -1,0 +1,114 @@
+version: "3.9"
+
+services:
+
+  # ── MySQL 8 Database ─────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE:      ${DB_NAME:-specforge}
+      MYSQL_USER:          ${DB_USER:-specforge_user}
+      MYSQL_PASSWORD:      ${DB_PASSWORD:-specforge_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root",
+             "--password=${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  # ── AI Service ───────────────────────────────────────────────────
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      GROQ_API_KEY:       ${GROQ_API_KEY}
+      GROQ_MODEL:         ${GROQ_MODEL:-llama-3.1-8b-instant}
+      GROQ_MAX_TOKENS:    ${GROQ_MAX_TOKENS:-4096}
+      GROQ_TEMPERATURE:   ${GROQ_TEMPERATURE:-0.1}
+      LOG_LEVEL:          ${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    volumes:
+      # Hot-reload: mount source so uvicorn --reload picks up changes
+      - ./ai-service:/app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    healthcheck:
+      test: ["CMD-SHELL",
+             "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Backend ──────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # DB_HOST always points to the db service — never "localhost"
+      DB_HOST:                 db
+      DB_PORT:                 ${DB_PORT:-3306}
+      DB_USER:                 ${DB_USER:-specforge_user}
+      DB_PASSWORD:             ${DB_PASSWORD:-specforge_pass}
+      DB_NAME:                 ${DB_NAME:-specforge}
+      APP_ENV:                 ${APP_ENV:-development}
+      APP_PORT:                ${APP_PORT:-3000}
+      CORS_ORIGIN:             ${CORS_ORIGIN:-http://localhost:5173}
+      # AI_SERVICE_URL always uses the service name, not localhost
+      AI_SERVICE_URL:          http://ai-service:8000
+      RATE_LIMIT_PER_MINUTE:   ${RATE_LIMIT_PER_MINUTE:-100}
+    ports:
+      - "3000:3000"
+    volumes:
+      # Hot-reload: mount source so uvicorn --reload picks up changes
+      - ./backend:/app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000", "--reload"]
+    depends_on:
+      db:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL",
+             "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')\" 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Frontend ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development        # Use the dev stage (npm run dev + HMR)
+    restart: unless-stopped
+    environment:
+      # Tells Vite's proxy where the backend is inside Docker
+      BACKEND_URL: http://backend:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      # Hot-reload: mount source
+      - ./frontend:/app
+      # Preserve the container's node_modules (don't overwrite with host)
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

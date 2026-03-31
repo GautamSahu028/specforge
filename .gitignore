@@ -77,6 +77,7 @@ docker-compose.override.yml
 
 db_data/
 *.sql
+!init.sql
 *.sqlite
 
 # =========================
