@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2e2e40 transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2e2e40;
+    border-radius: 3px;
+  }
+  ::selection {
+    background: #6366f1;
+    color: #fff;
+  }
+}
+
+@layer components {
+  .method-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium tracking-wide uppercase;
+  }
+  .method-get { @apply bg-emerald-500/15 text-emerald-400; }
+  .method-post { @apply bg-blue-500/15 text-blue-400; }
+  .method-put { @apply bg-amber-500/15 text-amber-400; }
+  .method-patch { @apply bg-orange-500/15 text-orange-400; }
+  .method-delete { @apply bg-rose-500/15 text-rose-400; }
+}
