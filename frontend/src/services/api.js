@@ -3,7 +3,8 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
-  timeout: 180_000, // 3 min for LLM-backed calls
+  timeout: 180_000,        // 3 min for LLM-backed calls
+  withCredentials: true,   // send HttpOnly auth cookie automatically
 });
 
 // Response interceptor — unwrap data or throw
@@ -22,6 +23,12 @@ api.interceptors.response.use(
     return Promise.reject(enhanced);
   }
 );
+
+// --- Auth ---
+export const register = (data) => api.post("/auth/register", data);
+export const login = (data) => api.post("/auth/login", data);
+export const logout = () => api.post("/auth/logout");
+export const getCurrentUser = () => api.get("/auth/me");
 
 // --- Projects ---
 export const createProject = (data) => api.post("/projects", data);
@@ -42,7 +49,6 @@ export const searchEndpoints = (params) => api.get("/search", { params });
 // --- Export ---
 export const exportMarkdown = (projectId) =>
   api.get(`/export/${projectId}/markdown`, { responseType: "text" }).then((res) => {
-    // axios interceptor already unwrapped, but for text we need raw
     return typeof res === "string" ? res : res.data;
   });
 

@@ -11,6 +11,7 @@ from app.models.endpoint import Endpoint
 from app.models.parameter import Parameter
 from app.models.example import Example
 from app.models.documentation_page import DocumentationPage
+from app.models.user import User
 
 __all__ = [
     "Base",
@@ -24,4 +25,5 @@ __all__ = [
     "Parameter",
     "Example",
     "DocumentationPage",
+    "User",
 ]

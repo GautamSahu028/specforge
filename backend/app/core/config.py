@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     # AI Service
     AI_SERVICE_URL: str = "http://localhost:8000"
 
+    # JWT Authentication
+    JWT_SECRET: str = "change-me-in-production-use-a-long-random-string"
+    JWT_EXPIRY_DAYS: int = 7
+
     # Rate limiting
     RATE_LIMIT_PER_MINUTE: int = 100
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Download } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getProject, exportMarkdown } from "../services/api";
 import Sidebar from "../components/Sidebar";
 import EndpointPage from "../components/EndpointPage";
@@ -46,13 +47,13 @@ export default function ProjectViewPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Loading project..." />;
+  if (loading) return <LoadingState message="Loading project…" />;
   if (error) return <ErrorState message={error} onRetry={fetchProject} />;
   if (!project) return <ErrorState message="Project not found" />;
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <Sidebar
         endpoints={project.endpoints || []}
         activeId={activeEndpoint?.id}
@@ -60,12 +61,17 @@ export default function ProjectViewPage() {
         projectName={project.name}
       />
 
-      {/* Main content */}
+      {/* ── Main content ── */}
       <main className="flex-1 min-w-0">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-surface-0/80 backdrop-blur-md border-b border-surface-3">
+        <header
+          className="sticky top-0 z-30 border-b border-white/[0.05]"
+          style={{
+            background: "rgba(10,10,15,0.82)",
+            backdropFilter: "blur(20px)",
+          }}
+        >
           <div className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-3">
-            {/* Spacer for mobile hamburger */}
             <div className="w-10 lg:hidden" />
 
             <SearchBar
@@ -74,19 +80,42 @@ export default function ProjectViewPage() {
               className="flex-1 max-w-md"
             />
 
-            <button
+            <motion.button
               onClick={handleExport}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-surface-2 hover:bg-surface-3 border border-surface-3 rounded-lg transition-colors shrink-0"
+              whileTap={{ scale: 0.96 }}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg shrink-0 transition-all duration-200"
+              style={{
+                background: "rgba(36,36,51,0.7)",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(46,46,64,0.9)";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(36,36,51,0.7)";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+              }}
             >
-              <Download size={14} />
-              <span className="hidden sm:inline">Export MD</span>
-            </button>
+              <Download size={14} className="text-text-muted" />
+              <span className="hidden sm:inline text-text-secondary">Export MD</span>
+            </motion.button>
           </div>
         </header>
 
-        {/* Content */}
+        {/* Endpoint content with animated transitions */}
         <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-4xl">
-          <EndpointPage endpoint={activeEndpoint} />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeEndpoint?.id ?? "empty"}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <EndpointPage endpoint={activeEndpoint} />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>
