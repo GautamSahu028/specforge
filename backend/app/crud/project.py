@@ -75,6 +75,17 @@ async def list_projects(
     return projects, total
 
 
+async def update_project_name(
+    db: AsyncSession, project_id: str, name: str
+) -> Project | None:
+    project = await db.get(Project, project_id)
+    if project:
+        project.name = name
+        await db.flush()
+        await db.refresh(project)
+    return project
+
+
 async def update_project_status(
     db: AsyncSession, project_id: str, status: ProjectStatus
 ) -> Project | None:

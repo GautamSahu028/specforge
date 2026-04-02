@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import MethodBadge from "./MethodBadge";
 import CodeBlock from "./CodeBlock";
 import Tabs from "./Tabs";
+import TryItPanel from "./TryItPanel";
 
 /* ─── Animation variants ─────────────────────────────────────────────────── */
 const stagger = {
@@ -107,7 +108,10 @@ export default function EndpointPage({ endpoint }) {
     );
   }
 
-  const { method, path, summary, description, parameters = [], examples = [] } = endpoint;
+  // Use || [] so null values from the API (not just undefined) also fall back to empty arrays
+  const { method, path, summary, description } = endpoint;
+  const parameters = endpoint.parameters || [];
+  const examples = endpoint.examples || [];
 
   const tabs = [
     {
@@ -159,6 +163,11 @@ export default function EndpointPage({ endpoint }) {
       count: examples.filter((e) => e.type === "ERROR").length,
       content: <ExamplesSection examples={examples} type="ERROR" />,
     },
+    {
+      key: "try-it",
+      label: "Try It",
+      content: <TryItPanel endpoint={endpoint} />,
+    },
   ];
 
   return (
@@ -191,7 +200,7 @@ export default function EndpointPage({ endpoint }) {
 
       {/* ── Tabs ── */}
       <motion.div variants={fadeUp}>
-        <Tabs tabs={tabs} defaultTab="overview" />
+        <Tabs key={endpoint.id} tabs={tabs} defaultTab="overview" />
       </motion.div>
     </motion.div>
   );

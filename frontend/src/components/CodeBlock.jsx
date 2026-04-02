@@ -6,11 +6,43 @@ import { cn, copyToClipboard } from "../utils/helpers";
 /* Terminal window dots */
 const DOT_COLORS = ["#fb7185", "#fbbf24", "#34d399"];
 
+/* Normalize code strings that were double-serialized (contain literal \" escapes).
+   1. If the whole string is a JSON-encoded string, decode it once.
+   2. If it looks like JSON content with escaped quotes, unescape them.
+   3. If the result is valid JSON, pretty-print it.
+   4. Otherwise return as-is. */
+function normalizeCode(raw) {
+  if (typeof raw !== "string") return raw;
+
+  let str = raw;
+
+  // Step 1: if the entire value is a JSON-encoded string (starts/ends with "), decode it
+  if (str.startsWith('"') && str.endsWith('"')) {
+    try { str = JSON.parse(str); } catch {}
+  }
+
+  // Step 2: unescape literal \" → " (double-serialized objects)
+  if (str.includes('\\"')) {
+    str = str.replace(/\\"/g, '"').replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+  }
+
+  // Step 3: if result is valid JSON, pretty-print it
+  try {
+    const parsed = JSON.parse(str);
+    if (typeof parsed === "object" && parsed !== null) {
+      return JSON.stringify(parsed, null, 2);
+    }
+  } catch {}
+
+  return str;
+}
+
 export default function CodeBlock({ code, language, title, className }) {
   const [copied, setCopied] = useState(false);
+  const displayCode = normalizeCode(code);
 
   const handleCopy = async () => {
-    await copyToClipboard(code);
+    await copyToClipboard(displayCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -108,7 +140,7 @@ export default function CodeBlock({ code, language, title, className }) {
         style={{ background: "rgba(10,10,15,0.95)" }}
       >
         <pre className="p-4 text-sm font-mono leading-relaxed text-text-primary">
-          <code>{code}</code>
+          <code>{displayCode}</code>
         </pre>
       </div>
     </div>

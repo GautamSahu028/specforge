@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.schemas.project import ProjectCreate, ProjectOut, ProjectListItem, ProjectIdBody
+from app.schemas.project import ProjectCreate, ProjectOut, ProjectListItem, ProjectIdBody, ProjectRename
 from app.schemas.endpoint import EndpointOut
 from app.schemas.response import SuccessResponse, PaginatedResponse, PaginationMeta
 from app.services import project_service
@@ -56,6 +56,12 @@ async def list_projects(
 @router.get("/{project_id}", response_model=SuccessResponse[ProjectOut])
 async def get_project(project_id: str, db: AsyncSession = Depends(get_db)):
     project = await project_service.get_project(db, project_id)
+    return SuccessResponse(data=ProjectOut.model_validate(project))
+
+
+@router.patch("/{project_id}", response_model=SuccessResponse[ProjectOut])
+async def rename_project(project_id: str, body: ProjectRename, db: AsyncSession = Depends(get_db)):
+    project = await project_service.rename_project(db, project_id, body.name)
     return SuccessResponse(data=ProjectOut.model_validate(project))
 
 

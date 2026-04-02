@@ -235,11 +235,22 @@ function FeatureCard({ feature, index }) {
 export default function LandingPage() {
   const canvasRef = useParticleCanvas();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [transitioning, setTransitioning] = useState(false);
   const featuresRef = useRef(null);
 
+  // Auto-redirect authenticated users to home
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate("/home", { replace: true });
+    }
+  }, [user, isLoading, navigate]);
+
   const handleEnter = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     setTransitioning(true);
     // navigate is called inside onAnimationComplete of the overlay
   };

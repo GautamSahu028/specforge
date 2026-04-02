@@ -34,6 +34,7 @@ export const getCurrentUser = () => api.get("/auth/me");
 export const createProject = (data) => api.post("/projects", data);
 export const listProjects = (params) => api.get("/projects", { params });
 export const getProject = (id) => api.get(`/projects/${id}`);
+export const renameProject = (id, name) => api.patch(`/projects/${id}`, { name });
 export const deleteProject = (id) => api.delete(`/projects/${id}`);
 
 // --- Parse & Generate ---

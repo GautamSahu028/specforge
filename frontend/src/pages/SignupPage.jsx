@@ -104,7 +104,7 @@ export default function SignupPage() {
     try {
       await signup(name.trim(), email, password);
       toast.success("Account created! Welcome to SpecForge.");
-      navigate("/landing", { replace: true });
+      navigate("/home", { replace: true });
     } catch (err) {
       toast.error(err.message || "Registration failed");
     } finally {

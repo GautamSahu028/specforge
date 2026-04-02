@@ -107,18 +107,10 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           {/* ── Public ── */}
+          <Route path="/" element={<Navigate to="/landing" replace />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-
-          {/* ── Protected ── */}
-          <Route
-            path="/landing"
-            element={
-              <ProtectedRoute>
-                <LandingPage />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/home"
             element={
@@ -161,8 +153,8 @@ function AnimatedRoutes() {
             }
           />
 
-          {/* ── Catch-all: redirect to /login ── */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* ── Catch-all: redirect to /landing ── */}
+          <Route path="*" element={<Navigate to="/landing" replace />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

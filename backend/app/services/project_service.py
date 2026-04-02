@@ -35,6 +35,11 @@ async def list_projects(
     return await project_crud.list_projects(db, page=page, limit=limit, status=status)
 
 
+async def rename_project(db: AsyncSession, project_id: str, name: str):
+    await get_project(db, project_id)
+    return await project_crud.update_project_name(db, project_id, name)
+
+
 async def delete_project(db: AsyncSession, project_id: str):
     await get_project(db, project_id)
     return await project_crud.delete_project(db, project_id)

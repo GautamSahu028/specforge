@@ -45,6 +45,10 @@ class ProjectListItem(BaseModel):
     endpoint_count: int = 0
 
 
+class ProjectRename(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+
+
 class ProjectIdBody(BaseModel):
     project_id: str = Field(..., alias="projectId")
 

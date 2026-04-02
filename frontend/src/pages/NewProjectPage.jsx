@@ -181,7 +181,7 @@ export default function NewProjectPage() {
           variants={fadeUp}
           initial="hidden"
           animate="visible"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
           className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors mb-8"
         >
           <ArrowLeft size={13} />

@@ -10,6 +10,7 @@ export default function Tabs({ tabs, defaultTab }) {
     <div>
       {/* ── Tab bar ── */}
       <div
+        data-tab-nav
         className="flex gap-0.5 overflow-x-auto mb-1 p-1 rounded-xl"
         style={{
           background: "rgba(18,18,26,0.5)",

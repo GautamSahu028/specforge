@@ -54,7 +54,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/landing";
+  const from = location.state?.from?.pathname || "/home";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +66,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       toast.success("Welcome back!");
-      navigate("/landing", { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       toast.error(err.message || "Login failed");
     } finally {

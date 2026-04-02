@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Menu, X, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import MethodBadge from "./MethodBadge";
 import { cn, groupBy } from "../utils/helpers";
 
 /* ─── Nav content (shared between desktop and mobile) ───────────────────── */
 function NavContent({ endpoints, activeId, onSelect, projectName, onClose }) {
+  const navigate = useNavigate();
   const grouped = groupBy(endpoints, "tag");
 
   return (
@@ -13,14 +15,17 @@ function NavContent({ endpoints, activeId, onSelect, projectName, onClose }) {
       {/* Logo / project name */}
       <div className="px-5 py-5 border-b border-white/[0.05] shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
             <div className="p-1.5 rounded-lg bg-accent/10 ring-1 ring-accent/20">
               <FileText size={14} className="text-accent-light" />
             </div>
             <span className="font-semibold text-sm tracking-tight text-text-primary">
               Spec<span className="text-accent-light">Forge</span>
             </span>
-          </div>
+          </button>
           {onClose && (
             <button
               onClick={onClose}
